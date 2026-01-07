@@ -42,6 +42,8 @@ export interface Listing {
   isActive: boolean
   ownerId: string
   ownerName: string
+  rating?: number // Optional rating (e.g., 4.5)
+  reviewCount?: number // Optional review count
   createdAt?: string
   updatedAt?: string
 }

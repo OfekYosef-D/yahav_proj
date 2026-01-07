@@ -14,7 +14,10 @@ export default function UserMenu() {
   // Mock session - replace with real session when next-auth is installed
   // To enable real auth, uncomment the next-auth imports after running:
   // npm install next-auth bcryptjs zod @types/bcryptjs
-  const session = { data: null as { user?: { name?: string; email?: string; role?: string } } | null, status: 'unauthenticated' as const }
+  const session: { data: { user?: { name?: string; email?: string; role?: string } } | null, status: 'authenticated' | 'unauthenticated' } = { 
+    data: null, 
+    status: 'unauthenticated' 
+  }
 
   useEffect(() => {
     setMounted(true)
@@ -57,7 +60,7 @@ export default function UserMenu() {
   }
 
   // Authenticated view
-  const { name, email, role } = session.data.user
+  const { name, email, role } = session.data?.user || {}
   const initials = name?.split(' ').map(n => n[0]).join('').slice(0, 2) || email?.[0]?.toUpperCase() || '?'
 
   const handleLogout = () => {
