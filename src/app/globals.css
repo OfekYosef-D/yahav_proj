@@ -1,0 +1,294 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* הגדרות בסיס RTL */
+:root {
+  --foreground-rgb: 23, 23, 23;
+  --background-rgb: 250, 250, 250;
+  --primary-color: 37, 99, 235;
+  --secondary-color: 22, 163, 74;
+}
+
+html {
+  direction: rtl;
+}
+
+body {
+  font-family: 'Rubik', sans-serif;
+  color: rgb(var(--foreground-rgb));
+  background-color: rgb(var(--background-rgb));
+}
+
+/* מחלקות עזר */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* RTL specific utilities */
+  .flip-horizontal {
+    transform: scaleX(-1);
+  }
+}
+
+@layer components {
+  /* כפתור ראשי */
+  .btn-primary {
+    @apply bg-primary-600 text-white px-6 py-3 rounded-lg font-medium 
+           hover:bg-primary-700 transition-colors duration-200
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+  }
+
+  /* כפתור משני */
+  .btn-secondary {
+    @apply bg-white text-primary-600 border-2 border-primary-600 px-6 py-3 rounded-lg font-medium
+           hover:bg-primary-50 transition-colors duration-200
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+  }
+
+  /* כרטיס בסיסי */
+  .card {
+    @apply bg-white rounded-xl shadow-md overflow-hidden
+           hover:shadow-lg transition-shadow duration-300;
+  }
+
+  /* שדה קלט */
+  .input-field {
+    @apply w-full px-4 py-3 border border-neutral-300 rounded-lg
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent
+           placeholder:text-neutral-400 text-right;
+  }
+
+  /* תווית */
+  .label {
+    @apply block text-sm font-medium text-neutral-700 mb-2;
+  }
+}
+
+/* ========================== */
+/* ANIMATIONS - WOW EFFECTS   */
+/* ========================== */
+
+/* Fade In */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Slide Up (for modals) */
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-slideUp {
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Slide Down (for mobile menu) */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideDown {
+  animation: slideDown 0.3s ease-out forwards;
+}
+
+/* Slide In Right (for new feed items - RTL) */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Gradient Shift (for magic button) */
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+}
+
+/* Marquee (for ticker) */
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+
+/* Glow Pulse */
+@keyframes glowPulse {
+  0%, 100% {
+    box-shadow: 0 0 5px rgba(251, 146, 60, 0.5), 0 0 20px rgba(251, 146, 60, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(251, 146, 60, 0.8), 0 0 40px rgba(251, 146, 60, 0.5);
+  }
+}
+
+.animate-glow-pulse {
+  animation: glowPulse 2s ease-in-out infinite;
+}
+
+/* Shake (for urgency) */
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-2px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(2px);
+  }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Scale Pop */
+@keyframes scalePop {
+  0% {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-scalePop {
+  animation: scalePop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Number Counter Effect */
+@keyframes countUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-countUp {
+  animation: countUp 0.5s ease-out forwards;
+}
+
+/* Breathing effect for FOMO */
+@keyframes breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+.animate-breathe {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+/* Border Glow Animation */
+@keyframes borderGlow {
+  0%, 100% {
+    border-color: rgba(251, 146, 60, 0.3);
+  }
+  50% {
+    border-color: rgba(251, 146, 60, 0.8);
+  }
+}
+
+.animate-border-glow {
+  animation: borderGlow 2s ease-in-out infinite;
+}
+
+/* Floating Animation */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Subtle attention grab */
+@keyframes attentionGrab {
+  0%, 100% {
+    transform: scale(1);
+  }
+  25% {
+    transform: scale(1.02);
+  }
+  50% {
+    transform: scale(0.98);
+  }
+  75% {
+    transform: scale(1.01);
+  }
+}
+
+.animate-attention {
+  animation: attentionGrab 2s ease-in-out infinite;
+}

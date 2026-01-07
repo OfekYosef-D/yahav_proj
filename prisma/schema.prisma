@@ -1,0 +1,248 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// Authentication Models (NextAuth.js)
+// ============================================
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ============================================
+// User Model - משתמשים
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  password      String?   // סיסמה מוצפנת (לאימות credentials)
+  image         String?
+  
+  // תפקיד המשתמש - נבחר בהרשמה
+  role          Role      @default(RENTER)
+  
+  // פרטים נוספים
+  phone         String?
+  bio           String?   @db.Text
+  
+  // מיקום המשתמש - לצורך התאמת ביקושים והתראות
+  location            String?   // מיקום עיקרי (עיר/אזור)
+  subscribedLocations String[]  // אזורים נוספים להתראות (למשכירים)
+  
+  // סטטוס החשבון
+  isActive      Boolean   @default(true)
+  isVerified    Boolean   @default(false)
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // יחסים - Auth
+  accounts      Account[]
+  sessions      Session[]
+  
+  // יחסים - Business Logic
+  listings      Listing[]         @relation("OwnerListings")
+  bookings      Booking[]         @relation("RenterBookings")
+  itemRequests  ItemRequest[]     @relation("UserRequests")
+  responses     RequestResponse[] @relation("UserResponses")
+
+  @@index([email])
+  @@index([role])
+  @@index([location])
+}
+
+// תפקיד המשתמש בפלטפורמה
+enum Role {
+  RENTER  // שוכר - מחפש פריטים להשכרה
+  LENDER  // משכיר - מציע פריטים להשכרה
+  ADMIN   // מנהל מערכת
+}
+
+// ============================================
+// Listing Model - פריטים להשכרה
+// ============================================
+
+model Listing {
+  id          String   @id @default(cuid())
+  title       String   // לדוגמה: "מזוודת Tumi גדולה"
+  description String   @db.Text
+  pricePerDay Decimal  @db.Decimal(10, 2)
+  location    String   // אזור/עיר
+  category    String?  // קטגוריה (מזוודות, תיקים, וכו')
+  images      String[] // מערך של URLs לתמונות
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // יחסים
+  ownerId  String
+  owner    User      @relation("OwnerListings", fields: [ownerId], references: [id])
+  bookings Booking[]
+
+  // אינדקס לחיפוש יעיל לפי מיקום
+  @@index([location])
+  @@index([ownerId])
+  @@index([isActive])
+}
+
+// ============================================
+// Booking Model - הזמנות
+// ============================================
+
+model Booking {
+  id         String        @id @default(cuid())
+  startDate  DateTime
+  endDate    DateTime
+  totalPrice Decimal       @db.Decimal(10, 2)
+  status     BookingStatus @default(PENDING)
+  message    String?       @db.Text // הודעה מהשוכר
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  // יחסים
+  listingId String
+  listing   Listing @relation(fields: [listingId], references: [id])
+  renterId  String
+  renter    User    @relation("RenterBookings", fields: [renterId], references: [id])
+
+  @@index([listingId])
+  @@index([renterId])
+  @@index([status])
+}
+
+enum BookingStatus {
+  PENDING    // ממתין לאישור
+  APPROVED   // אושר
+  REJECTED   // נדחה
+  COMPLETED  // הושלם
+  CANCELLED  // בוטל
+}
+
+// ============================================
+// Request Model - ביקושים (הפצת דרישות)
+// ============================================
+
+model ItemRequest {
+  id          String        @id @default(cuid())
+  title       String        // מה אני מחפש
+  description String        @db.Text
+  category    String?
+  
+  // טווח תקציב
+  budgetMin   Decimal?      @db.Decimal(10, 2)
+  budgetMax   Decimal?      @db.Decimal(10, 2)
+  
+  // תאריכים
+  neededFrom  DateTime
+  neededUntil DateTime
+  
+  // מיקום
+  location    String
+  
+  // סטטוס
+  status      RequestStatus @default(OPEN)
+  
+  // מטא-דאטה
+  viewCount     Int         @default(0)
+  responseCount Int         @default(0)
+  
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  expiresAt   DateTime?
+
+  // יחסים
+  requesterId String
+  requester   User              @relation("UserRequests", fields: [requesterId], references: [id])
+  responses   RequestResponse[]
+
+  @@index([location])
+  @@index([status])
+  @@index([requesterId])
+  @@index([neededFrom])
+  @@index([location, status])
+}
+
+enum RequestStatus {
+  OPEN
+  FULFILLED
+  EXPIRED
+  CANCELLED
+}
+
+// ============================================
+// Request Response Model - תגובות לביקושים
+// ============================================
+
+model RequestResponse {
+  id           String         @id @default(cuid())
+  message      String         @db.Text
+  offeredPrice Decimal?       @db.Decimal(10, 2)
+  status       ResponseStatus @default(PENDING)
+  
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  // יחסים
+  requestId   String
+  request     ItemRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  
+  listingId   String?
+  responderId String
+  responder   User        @relation("UserResponses", fields: [responderId], references: [id])
+
+  @@index([requestId])
+  @@index([responderId])
+  @@unique([requestId, responderId])
+}
+
+enum ResponseStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
