@@ -239,7 +239,7 @@ export default function ListItemPage() {
 
               {/* הסכמה */}
               <p className="text-xs text-neutral-400 text-center">
-                בלחיצה על "פרסם את הפריט" אתם מסכימים ל
+                בלחיצה על &quot;פרסם את הפריט&quot; אתם מסכימים ל
                 <a href="#" className="text-primary-600 hover:underline">תנאי השימוש</a>
                 {' '}ול
                 <a href="#" className="text-primary-600 hover:underline">מדיניות הפרטיות</a>
